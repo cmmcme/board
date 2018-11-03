@@ -19,7 +19,7 @@ module.exports = function(app, dbo) {
         let password = req.body.password;
         console.log(username, password);
         let userInfoCol = dbo.collection('userInfo');
-        userInfoCol.findOne({_userId_ : username}, function(err, result){
+        userInfoCol.findOne({userId : username}, function(err, result){
             if(err) throw err;
             console.log('!!');
             if(result.password == password) {
@@ -36,8 +36,32 @@ module.exports = function(app, dbo) {
         if(!sess.userId) {
             res.redirect('/');
         } else {
-            res.render('main');
-            console.log(sess.userId);
+            let boardCol=dbo.collection('board');
+            console.log("DFsd")
+            boardCol.find().toArray(function(err, result) {
+                if(err) {
+    
+                } else {
+                    console.log(result);
+                }
+                let maxDisplayNum=Math.min(result.length,10)
+                let page=result.length/10+1;
+                res.render('main',{ 
+                    boardResult:result,
+                    maxDisplayNum:maxDisplayNum,
+                    page:page
+                });
+            });
+        }
+    });
+    app.get('/main/new', function(req, res) {
+        sess = req.session;
+        if(!sess.userId) {
+            res.redirect('/');
+        }else{
+            res.render('write',{
+            
+            });
         }
     });
 }
