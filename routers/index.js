@@ -39,8 +39,7 @@ module.exports = function(app, dbo) {
             res.redirect('/');
         } else {
             let boardCol=dbo.collection('board');
-            console.log("DFsd")
-            boardCol.find().toArray(function(err, result) {
+            boardCol.find().sort({num : -1}).toArray(function(err, result) {
                 if(err) {
     
                 } else {
@@ -65,6 +64,16 @@ module.exports = function(app, dbo) {
             
             });
         }
+    });
+    app.post('/main/write-complete', function(req, res) {
+        sess = req.session;
+        let content=req.body.content;
+        let title=req.body.title;
+        let boardCol=dbo.collection('board');
+        boardCol.insertOne({num:2,title:title,contents:content,count:1,writer:sess.userId},function(err,result){
+            if(err) throw err;
+            res.redirect('/main');
+        })
     });
     app.get('/signup', function(req, res) {
         res.render('signUp');
