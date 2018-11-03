@@ -1,13 +1,15 @@
 module.exports = function(app, dbo) {
     app.get('/', function(req, res) {
         sess = req.session;
-        console.log(sess.userId);
+        var isSignUp = req.query.isSignUp;
+    //    console.log(sess.userId);
         if(sess.userId) {
             res.redirect('/main');
         } else {
             res.render('defaultPage', {
                 title : 'My Board',
                 length : 5,
+                isSignUp : isSignUp,
                 userId : sess.userId
             });
         }
@@ -17,11 +19,11 @@ module.exports = function(app, dbo) {
         sess = req.session;
         let username = req.body.username;
         let password = req.body.password;
-        console.log(username, password);
+  //      console.log(username, password);
         let userInfoCol = dbo.collection('userInfo');
         userInfoCol.findOne({userId : username}, function(err, result){
             if(err) throw err;
-            console.log('!!');
+   //         console.log('!!');
             if(result.password == password) {
                 sess.userId = username;
                 res.redirect('/main');
@@ -64,4 +66,29 @@ module.exports = function(app, dbo) {
             });
         }
     });
+    app.get('/signup', function(req, res) {
+        res.render('signUp');
+    });
+    app.post('/dupcheck', function(req, res) {
+        let userId = req.body.userId;
+        let password = req.body.password;
+        console.log(userId, password);
+        let userInfoCol = dbo.collection('userInfo');
+        userInfoCol.findOne({userId : userId}, function(err, result){
+            if(err) {
+                console.error(err);
+                throw err;
+            }
+            console.log('result ',result);
+            if(!result) {
+                userInfoCol.insertOne({userId : userId, password : password}, function(err,result) {
+                    if(err) throw err;
+                    res.redirect('/?isSignUp=1');
+                });
+            } else {
+                res.redirect('/?isSignUp=-1');
+            }
+
+        });
+    })
 }
