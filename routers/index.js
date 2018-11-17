@@ -33,7 +33,6 @@ module.exports = function(app, dbo) {
             }
         });
     });
-
     app.get('/main', function(req, res) {
         sess = req.session;
         if(!sess.userId) {
@@ -56,8 +55,14 @@ module.exports = function(app, dbo) {
             });
         }
     });
-    app.get('/main/read',function(req,res){
-       
+    app.post('/main/read',function(req,res){
+        let index = req.body.write_id;
+       console.log(index);
+       let boardCol=dbo.collection('board');
+       boardCol.findOne({num : index}, function(err, result) {
+           if(err) throw err;
+           console.log(result);
+       });
     });
     app.get('/main/new', function(req, res) {
         sess = req.session;
