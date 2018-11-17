@@ -27,8 +27,9 @@
                 </thead>
                 <tbody>
                    <% for(var i=0; i<maxDisplayNum; i++){%>
-                   <tr>
-                        <td><%= boardResult[i].num %></td>
+                   <tr id=<%= "tr"+i %>>
+
+                        <td id=<%="write_id"+i %>><%= boardResult[i].num %></td>
                         <td><%= boardResult[i].title %></td>
                         <td><%= boardResult[i].writer %></td>
                         <td><%= boardResult[i].count %></td>
@@ -44,4 +45,13 @@
         </div>
         <a class="btn btn-default" href="/main/new" role="button">글쓰기</a>
     </body>
+    <script>
+        for(var i=0;i<'<%= maxDisplayNum %>';i++){
+            trid="tr"+i;
+            write_id="write_id"+i;
+            document.getElementById(trid).addEventListener('click',function(event){
+                console.log(document.getElementById(write_id).innerText);
+            })
+        }
+    </script>
 </html>

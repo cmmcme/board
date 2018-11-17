@@ -2,6 +2,8 @@ module.exports = function(app, dbo) {
     app.get('/', function(req, res) {
         sess = req.session;
         var isSignUp = req.query.isSignUp;
+        sess.userId="jjj"
+    //    console.log(sess.userId);
         if(sess.userId) {
             res.redirect('/main');
         } else {
@@ -18,43 +20,16 @@ module.exports = function(app, dbo) {
         sess = req.session;
         let username = req.body.username;
         let password = req.body.password;
+  //      console.log(username, password);
         let userInfoCol = dbo.collection('userInfo');
         userInfoCol.findOne({userId : username}, function(err, result){
             if(err) throw err;
+   //         console.log('!!');
             if(result.password == password) {
                 sess.userId = username;
                 res.redirect('/main');
             } else {
                 res.redirect('/');
-            }
-        });
-    });
-
-    app.get('/logout', function(req, res) {
-        req.session.destroy(function(err){
-            if(err) throw err;
-            res.redirect('/');
-         });
-    });
-
-    app.get('/signup', function(req, res) {
-        res.render('signUp');
-    });
-
-    app.post('/dupcheck', function(req, res) {
-        let userId = req.body.userId;
-        let password = req.body.password;
-        let userInfoCol = dbo.collection('userInfo');
-        userInfoCol.findOne({userId : userId}, function(err, result){
-            if(err) throw err;
-
-            if(!result) {
-                userInfoCol.insertOne({userId : userId, password : password}, function(err,result) {
-                    if(err) throw err;
-                    res.redirect('/?isSignUp=1');
-                });
-            } else {
-                res.redirect('/?isSignUp=-1');
             }
         });
     });
@@ -66,10 +41,13 @@ module.exports = function(app, dbo) {
         } else {
             let boardCol=dbo.collection('board');
             boardCol.find().sort({num : -1}).toArray(function(err, result) {
-                if(err) throw err;
-
+                if(err) {
+    
+                } else {
+                    //console.log(result);
+                }
                 let maxDisplayNum=Math.min(result.length,10)
-                let page=result.length/10+1;
+                let page=Math.floor(result.length/10+1);
                 res.render('main',{ 
                     boardResult:result,
                     maxDisplayNum:maxDisplayNum,
@@ -78,24 +56,55 @@ module.exports = function(app, dbo) {
             });
         }
     });
-
+    app.get('/main/read',function(req,res){
+       
+    });
     app.get('/main/new', function(req, res) {
         sess = req.session;
         if(!sess.userId) {
             res.redirect('/');
-        } else {
-            res.render('write',{});
+        }else{
+            res.render('write',{
+            
+            });
         }
     });
-
     app.post('/main/write-complete', function(req, res) {
         sess = req.session;
         let content=req.body.content;
         let title=req.body.title;
         let boardCol=dbo.collection('board');
         boardCol.insertOne({num:2,title:title,contents:content,count:1,writer:sess.userId},function(err,result){
-            if(err) throw err;
+            if(err) {
+                console.log(err);
+                throw err;
+            }
             res.redirect('/main');
-        });
+        })
     });
+    app.get('/signup', function(req, res) {
+        res.render('signUp');
+    });
+    app.post('/dupcheck', function(req, res) {
+        let userId = req.body.userId;
+        let password = req.body.password;
+        console.log(userId, password);
+        let userInfoCol = dbo.collection('userInfo');
+        userInfoCol.findOne({userId : userId}, function(err, result){
+            if(err) {
+                console.error(err);
+                throw err;
+            }
+            console.log('result ',result);
+            if(!result) {
+                userInfoCol.insertOne({userId : userId, password : password}, function(err,result) {
+                    if(err) throw err;
+                    res.redirect('/?isSignUp=1');
+                });
+            } else {
+                res.redirect('/?isSignUp=-1');
+            }
+
+        });
+    })
 }
