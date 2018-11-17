@@ -61,10 +61,10 @@ module.exports = function(app, dbo) {
         let boardCol=dbo.collection('board');
         boardCol.findOne({num : index}, function(err, result) {
            if(err) throw err;
-           console.log(result);
+           boardCol.update({num : index}, {$inc : {count : 1}});
            res.render('read',{
                writing:result
-           })
+           });
         });
     });
     app.get('/main/new', function(req, res) {
