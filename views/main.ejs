@@ -1,57 +1,67 @@
 <html>
-    <head>
-        <!-- 합쳐지고 최소화된 최신 CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-        <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    </head>
-    <body>
-         <div class="pull-right">
-             <a href="/logout">
-                <button type="button" class="btn btn-danger">로그아웃</button>
-            </a>
-         </div>
-        <div class="page-header">
-            <h1>My Board <small>with Node.js</small></h1>
-        </div>
+<head>
+<!-- 합쳐지고 최소화된 최신 CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="pull-right">
+        <a href="/logout">
+        <button type="button" class="btn btn-danger">로그아웃</button>
+    </a>
+    </div>
+<div class="page-header">
+    <h1>My Board <small>with Node.js</small></h1>
+</div>
 
-        <div>
-            <table class="table table-hover">
-                <thead>
-                   <tr>
-                       <th>No</th>
-                       <th>Title</th>
-                       <th>작성자</th>
-                       <th>조회수</th>
-                   </tr>
-                </thead>
-                <tbody>
-                   <% for(var i=0; i<maxDisplayNum; i++){%>
-                   <tr id=<%= "tr"+i %>>
-
-                        <td id=<%="write_id"+i %>><%= boardResult[i].num %></td>
-                        <td><%= boardResult[i].title %></td>
-                        <td><%= boardResult[i].writer %></td>
-                        <td><%= boardResult[i].count %></td>
-                    </tr>
-                    <%}%>
-                </tbody>  
-            </table>
-            <div>
-                <% for(var i=0; i<page; i++){%>
-                    <a href=""><%= i+1 %></a>
-                <%}%>
-            </div>
-        </div>
-        <a class="btn btn-default" href="/main/new" role="button">글쓰기</a>
-    </body>
-    <script>
-        for(var i=0;i<'<%= maxDisplayNum %>';i++){
-            trid="tr"+i;
-            write_id="write_id"+i;
-            document.getElementById(trid).addEventListener('click',function(event){
-                console.log(document.getElementById(write_id).innerText);
-            })
-        }
-    </script>
+<div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Title</th>
+                <th>작성자</th>
+                <th>조회수</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i<maxDisplayNum; i++){%>
+            <tr id=<%= "tr"+i %>>
+                <td id=<%="write_id"+i %>><%= boardResult[i].num %></td>
+                <td><%= boardResult[i].title %></td>
+                <td><%= boardResult[i].writer %></td>
+                <td><%= boardResult[i].count %></td>
+            </tr>
+            <%}%>
+        </tbody>  
+    </table>
+    <div>
+        <% for(var i=0; i<page; i++){%>
+            <a href=""><%= i+1 %></a>
+        <%}%>
+    </div>
+</div>
+<a class="btn btn-default" href="/main/new" role="button">글쓰기</a>
+</body>
+<script>
+for(var i=0;i<'<%= maxDisplayNum %>';i++){
+    let trid="tr"+i;
+    let write_id="write_id"+i;
+    document.getElementById(trid).addEventListener('click',function(event){
+        console.log(document.getElementById(write_id).innerText);
+        var url= "/main/read"
+        var form = document.createElement("form");
+        form.setAttribute("method","post");
+        form.setAttribute("action",url);
+        var hiddenField=document.createElement("input");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("name", "write_id");
+        hiddenField.setAttribute("value", document.getElementById(write_id).innerText);
+        form.appendChild(hiddenField);
+        document.body.appendChild(form);
+        form.submit();
+    })
+}
+</script>
 </html>
