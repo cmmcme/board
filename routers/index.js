@@ -2,8 +2,6 @@ module.exports = function(app, dbo) {
     app.get('/', function(req, res) {
         sess = req.session;
         var isSignUp = req.query.isSignUp;
-        sess.userId="jjj"
-    //    console.log(sess.userId);
         if(sess.userId) {
             res.redirect('/main');
         } else {
@@ -20,14 +18,18 @@ module.exports = function(app, dbo) {
         sess = req.session;
         let username = req.body.username;
         let password = req.body.password;
-  //      console.log(username, password);
         let userInfoCol = dbo.collection('userInfo');
         userInfoCol.findOne({userId : username}, function(err, result){
             if(err) throw err;
-   //         console.log('!!');
             if(result.password == password) {
                 sess.userId = username;
-                res.redirect('/main');
+                const url = require('url');
+                res.redirect(url.format({
+                    pathname : '/main',
+                    query: {
+                        "pos" : 1
+                    }
+                }));
             } else {
                 res.redirect('/');
             }
@@ -35,33 +37,36 @@ module.exports = function(app, dbo) {
     });
     app.get('/main', function(req, res) {
         sess = req.session;
+        let pos = req.query.pos;
         if(!sess.userId) {
             res.redirect('/');
         } else {
             let boardCol=dbo.collection('board');
-            boardCol.find().sort({num : -1}).toArray(function(err, result) {
-                if(err) {
-    
-                } else {
-                    //console.log(result);
-                }
-                let maxDisplayNum=Math.min(result.length,10)
-                let page=Math.floor(result.length/10+1);
-                res.render('main',{ 
-                    boardResult:result,
-                    maxDisplayNum:maxDisplayNum,
-                    page:page
+            boardCol.count().then((cnt) => { 
+                let page=Math.floor(cnt/10+1);
+                boardCol.find({num : {$gte:(pos-1)*10 + 1, $lte :pos * 10}}).sort({num : -1}).toArray(function(err, result) {
+                    if(err) throw err;
+                    let maxDisplayNum=Math.min(result.length,10)
+                    res.render('main',{ 
+                        boardResult:result,
+                        maxDisplayNum:maxDisplayNum,
+                        page:page
+                    });
                 });
             });
         }
     });
     app.post('/main/read',function(req,res){
-        let index = req.body.write_id;
+        let index = parseInt(req.body.write_id);
        console.log(index);
        let boardCol=dbo.collection('board');
        boardCol.findOne({num : index}, function(err, result) {
            if(err) throw err;
-           console.log(result);
+      //     boardCol.update({'num' : index}, {'$inc': {'count': 1}});
+           res.render('read', {
+               board : result
+           })
+           console.log(result.contents);
        });
     });
     app.get('/main/new', function(req, res) {
