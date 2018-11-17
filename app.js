@@ -19,7 +19,7 @@ app.use(session( {
     secret : '@#@MYSIGN#@$#$',
     saveUnitialized : true
 }));
-MongoClient.connect('mongodb://192.168.0.11:27017', function(err, db) {
+MongoClient.connect('mongodb://localhost:27017', function(err, db) {
     if(err) {
         console.log(err);
         throw err;
@@ -27,4 +27,4 @@ MongoClient.connect('mongodb://192.168.0.11:27017', function(err, db) {
        var dbo = db.db('board');
     }
     var router = require('./routers')(app,dbo);
-})
+});

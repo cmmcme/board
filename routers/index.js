@@ -74,13 +74,12 @@ module.exports = function(app, dbo) {
         let content=req.body.content;
         let title=req.body.title;
         let boardCol=dbo.collection('board');
-        boardCol.insertOne({num:2,title:title,contents:content,count:1,writer:sess.userId},function(err,result){
-            if(err) {
-                console.log(err);
-                throw err;
-            }
-            res.redirect('/main');
-        })
+        boardCol.count().then((cnt) => { 
+            boardCol.insertOne({num:cnt + 1,title:title,contents:content,count:1,writer:sess.userId},function(err,result){
+                if(err) throw err;
+                res.redirect('/main');
+            });
+        });
     });
     app.get('/signup', function(req, res) {
         res.render('signUp');
