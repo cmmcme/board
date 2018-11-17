@@ -58,16 +58,14 @@ module.exports = function(app, dbo) {
     });
     app.post('/main/read',function(req,res){
         let index = parseInt(req.body.write_id);
-       console.log(index);
-       let boardCol=dbo.collection('board');
-       boardCol.findOne({num : index}, function(err, result) {
+        let boardCol=dbo.collection('board');
+        boardCol.findOne({num : index}, function(err, result) {
            if(err) throw err;
-      //     boardCol.update({'num' : index}, {'$inc': {'count': 1}});
-           res.render('read', {
-               board : result
+           console.log(result);
+           res.render('read',{
+               writing:result
            })
-           console.log(result.contents);
-       });
+        });
     });
     app.get('/main/new', function(req, res) {
         sess = req.session;
