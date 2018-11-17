@@ -56,13 +56,15 @@ module.exports = function(app, dbo) {
         }
     });
     app.post('/main/read',function(req,res){
-        let index = req.body.write_id;
-       console.log(index);
-       let boardCol=dbo.collection('board');
-       boardCol.findOne({num : index}, function(err, result) {
+        let index = parseInt(req.body.write_id);
+        let boardCol=dbo.collection('board');
+        boardCol.findOne({num : index}, function(err, result) {
            if(err) throw err;
            console.log(result);
-       });
+           res.render('read',{
+               writing:result
+           })
+        });
     });
     app.get('/main/new', function(req, res) {
         sess = req.session;
