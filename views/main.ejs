@@ -37,9 +37,14 @@
         </tbody>  
     </table>
     <div>
-        <% for(var i=0; i<page; i++){%>
-            <a href=""><%= i+1 %></a>
-        <%}%>
+        <div class="text-center">
+             <ul class = "pagination">
+                 <% for(var i=0; i<page; i++){%>
+                    <li><a href=<%= "/main?pos="+ (i + 1)%>><%= i+1 %></a></li>
+                <%}%>
+             </ul>
+        </div>
+ 
     </div>
 </div>
 <a class="btn btn-default" href="/main/new" role="button">글쓰기</a>
