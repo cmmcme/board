@@ -42,6 +42,8 @@ module.exports = function(app, dbo) {
             res.redirect('/');
         } else {
             let boardCol=dbo.collection('board');
+            let boardIndex = dbo.collection('boardIndex');
+        //    boardIndex.find()
             boardCol.count().then((cnt) => { 
                 let page=Math.floor(cnt/10+1);
                 boardCol.find({num : {$gte:(pos-1)*10 + 1, $lte :pos * 10}}).sort({num : -1}).toArray(function(err, result) {
@@ -61,10 +63,10 @@ module.exports = function(app, dbo) {
         let boardCol=dbo.collection('board');
         boardCol.findOne({num : index}, function(err, result) {
            if(err) throw err;
-           console.log(result);
+           boardCol.update({num : index}, {$inc : {count : 1}});
            res.render('read',{
                writing:result
-           })
+           });
         });
     });
     app.get('/main/new', function(req, res) {
@@ -85,7 +87,7 @@ module.exports = function(app, dbo) {
         boardCol.count().then((cnt) => { 
             boardCol.insertOne({num:cnt + 1,title:title,contents:content,count:1,writer:sess.userId},function(err,result){
                 if(err) throw err;
-                res.redirect('/main');
+                res.redirect('/main?pos=1');
             });
         });
     });
