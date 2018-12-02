@@ -1,33 +1,33 @@
-module.exports = function(app, dbo) {
-    app.get('/', function(req, res) {
+module.exports = function (app, dbo) {
+    app.get('/', function (req, res) {
         sess = req.session;
         var isSignUp = req.query.isSignUp;
-        if(sess.userId) {
+        if (sess.userId) {
             res.redirect('/main');
         } else {
             res.render('defaultPage', {
-                title : 'My Board',
-                length : 5,
-                isSignUp : isSignUp,
-                userId : sess.userId
+                title: 'My Board',
+                length: 5,
+                isSignUp: isSignUp,
+                userId: sess.userId
             });
         }
     });
 
-    app.post('/login', function(req, res) {
+    app.post('/login', function (req, res) {
         sess = req.session;
         let username = req.body.username;
         let password = req.body.password;
         let userInfoCol = dbo.collection('userInfo');
-        userInfoCol.findOne({userId : username}, function(err, result){
-            if(err) throw err;
-            if(result.password == password) {
+        userInfoCol.findOne({ userId: username }, function (err, result) {
+            if (err) throw err;
+            if (result.password == password) {
                 sess.userId = username;
                 const url = require('url');
                 res.redirect(url.format({
-                    pathname : '/main',
+                    pathname: '/main',
                     query: {
-                        "pos" : 1
+                        "pos": 1
                     }
                 }));
             } else {
@@ -35,7 +35,6 @@ module.exports = function(app, dbo) {
             }
         });
     });
-    
     app.get('/signup', function(req, res) {
         res.render('signUp');
     });
@@ -70,7 +69,7 @@ module.exports = function(app, dbo) {
         if(!sess.userId) {
             res.redirect('/');
         } else {
-            let boardCol=dbo.collection('board');
+            let boardCol = dbo.collection('board');
             let boardIndex = dbo.collection('boardIndex');
             boardIndex.findOne({name : 'index'}).then((result) => {
                 let index = result.num;
@@ -90,37 +89,62 @@ module.exports = function(app, dbo) {
             });
         }
     });
-
     app.post('/main/read',function(req,res){
         let index = parseInt(req.body.write_id);
-        let boardCol=dbo.collection('board');
-        boardCol.findOne({num : index}, function(err, result) {
-           if(err) throw err;
-           boardCol.update({num : index}, {$inc : {count : 1}});
-           res.render('read',{
-               writing:result
-           });
+        let boardCol = dbo.collection('board');
+        boardCol.findOne({ num: index }, function (err, result) {
+            if (err) throw err;
+            boardCol.update({ num: index }, { $inc: { count: 1 } });
+            res.render('read', {
+                writing: result
+            });
         });
     });
-
-    app.get('/main/new', function(req, res) {
+  
+    app.get('/main/write', function (req, res) {
         sess = req.session;
-        if(!sess.userId) {
-            res.redirect('/');
-        }else{
-            res.render('write',{
+        let number = parseInt(req.query.number);
+        if (!isNaN(number)) {
+            console.log("modify")
+            let boardCol = dbo.collection('board');
+            boardCol.findOne({ num: number }, function (err, result) {
+                if (err) throw err;
+                if (sess.userId != result.writer) {
+                    res.render('noRight')
+                } else {
+                    res.render('write', {
+                        title: result.title,
+                        content: result.contents,
+                        number:result.num,
+                        isUpdate:true
+                    });
+                }
             });
         }
+        else {
+            console.log("write")
+            if (!sess.userId) {
+                res.redirect('/');
+            } else {
+                res.render('write', {
+                    title: "",
+                    content: "",
+                    isUpdate:false
+                });
+            }
+        }
     });
-
-    app.post('/main/write-complete', function(req, res) {
+    app.post('/main/write-complete', function (req, res) {
         sess = req.session;
-        let content=req.body.content;
-        let title=req.body.title;
-        let boardCol=dbo.collection('board');
-        let boardIndex = dbo.collection('boardIndex');
-
-        boardIndex.findOne({name : 'index'}).then((result) => {
+        let content = req.body.content;
+        let title = req.body.title;
+        let number= req.body.number;
+        let boardCol = dbo.collection('board');
+        console.log(number)
+        if(number!=undefined){
+            boardCol.updateOne({ num: number }, {$set:{contents:content}}, {$set:{title:title}});
+        }else{
+          boardIndex.findOne({name : 'index'}).then((result) => {
             return boardCol.insertOne({num:result.num + 1,title:title,contents:content,count:1,writer:sess.userId});
         }).then((result) => {
             res.redirect('/main?pos=1');
@@ -129,6 +153,7 @@ module.exports = function(app, dbo) {
         .catch((err) => {
             throw err;
         });
+    }
     });
 
     app.get('/deletepage', function(req, res) {

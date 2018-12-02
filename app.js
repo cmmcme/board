@@ -19,7 +19,7 @@ app.use(session( {
     secret : '@#@MYSIGN#@$#$',
     saveUnitialized : true
 }));
-MongoClient.connect('mongodb://localhost:27017', function(err, db) {
+MongoClient.connect('mongodb://192.168.0.76:27017', function(err, db) {
     if(err) {
         console.log(err);
         throw err;
